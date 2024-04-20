@@ -179,7 +179,6 @@ def display_user_list():
         ),
         rx.foreach(
             State.driver_dict,
-            # get_keys(State.driver_dict),
             lambda name: rx.text(name)
         ),
         rx.text(
@@ -187,13 +186,9 @@ def display_user_list():
         ),
         rx.foreach(
             State.passenger_dict,
-            # get_keys(State.passenger_dict),
-            lambda name: rx.text(name)
+            lambda name: rx.text(name),
         )
     )
-
-def get_keys(d: dict):
-    return [k for k in d]
 
 
 def create_lobby():
