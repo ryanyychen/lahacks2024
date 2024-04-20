@@ -20,6 +20,7 @@ def homepage() -> rx.Component:
                 ),
             ),
             rx.vstack(
+
                 rx.box(
                     rx.heading("Lobbies"),
                     padding="1em",
@@ -55,7 +56,31 @@ def homepage() -> rx.Component:
                     border_width="5px",
                 ),
             ),
+            rx.chakra.popover(
+                rx.chakra.popover_trigger(
+                    rx.chakra.button("Popover Example")
+                ),
+                rx.chakra.popover_content(
+                    rx.center(
+                        rx.box(
+                            rx.heading("Create Lobby"),
+                            rx.text("Name"),
+                            rx.input(),
+                            rx.text("Description"),
+                            rx.input(),
+                            rx.text("Date"),
+                            rx.input(),
+                            rx.text("Time"),
+                            rx.input(),
+                            rx.button("Create"),
+                            padding="1em",
+                            border_width="5px",
+                        ),
+                        padding="5em",
+                    ),
+                ),
+            ),
             gap="15vw",
             margin="5vh",
-        )
+        ),
     )
