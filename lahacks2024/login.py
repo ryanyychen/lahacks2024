@@ -12,6 +12,7 @@ class LogInFormInputState(rx.State):
             # Query database and check email against password
             user = session.exec(User).filter(User.email == form_data["email"]).first()
             if user and user.password == form_data["password"]:
+                rx.State.logged_in = True
                 # Redirect to homepage
                 return rx.redirect("/")
             else:
