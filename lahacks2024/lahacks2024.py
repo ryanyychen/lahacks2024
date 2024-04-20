@@ -3,36 +3,18 @@
 from rxconfig import config
 from lahacks2024.login import login
 from lahacks2024.register import register
+from lahacks2024.homepage import homepage
 from lahacks2024.userModel import User
 import reflex as rx
-
-docs_url = "https://reflex.dev/docs/getting-started/introduction/"
-filename = f"{config.app_name}/{config.app_name}.py"
 
 class State(rx.State):
     """The app state."""
 
-def index() -> rx.Component:
-    return rx.center(
-        rx.theme_panel(),
-        rx.vstack(
-            rx.heading("Welcome to Reflex!", size="9"),
-            rx.text("Get started by editing ", rx.code(filename)),
-            rx.button(
-                "Check out our docs!",
-                on_click=lambda: rx.redirect(docs_url),
-                size="4",
-            ),
-            rx.logo(),
-            align="center",
-            spacing="7",
-            font_size="2em",
-        ),
-        height="100vh",
-    )
+# Global Styling
+style = {
+}
 
-
-app = rx.App()
-app.add_page(index, route="/", title="Homepage")
+app = rx.App(style=style)
+app.add_page(homepage, route="/", title="Homepage")
 app.add_page(login, route="/login", title="Login")
 app.add_page(register, route="/register", title="Register")
