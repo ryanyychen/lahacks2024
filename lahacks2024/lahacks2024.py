@@ -1,16 +1,16 @@
 """Welcome to Reflex! This file outlines the steps to create a basic app."""
 
 from rxconfig import config
-
+from lahacks2024.login import login
+from lahacks2024.register import register
+from lahacks2024.userModel import User
 import reflex as rx
 
 docs_url = "https://reflex.dev/docs/getting-started/introduction/"
 filename = f"{config.app_name}/{config.app_name}.py"
 
-
 class State(rx.State):
     """The app state."""
-
 
 def index() -> rx.Component:
     return rx.center(
@@ -33,4 +33,6 @@ def index() -> rx.Component:
 
 
 app = rx.App()
-app.add_page(index)
+app.add_page(index, route="/", title="Homepage")
+app.add_page(login, route="/login", title="Login")
+app.add_page(register, route="/register", title="Register")
