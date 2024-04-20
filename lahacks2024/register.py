@@ -29,7 +29,6 @@ class FormInputState(rx.State):
 
 def register() -> rx.Component:
     return rx.center(
-        rx.theme_panel(),
         rx.vstack(
             # HTML <form> tag
             rx.form.root(

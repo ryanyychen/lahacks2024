@@ -12,7 +12,6 @@ input_style = {
 
 def login() -> rx.Component:
     return rx.center(
-        rx.theme_panel(),
         rx.flex(
             rx.heading("Log in page", size="9"),
             rx.flex(
