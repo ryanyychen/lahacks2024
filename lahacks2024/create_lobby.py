@@ -40,6 +40,9 @@ class State(rx.State):
         
         for code in geocodes:
             print(code)
+        
+    def change_user_type(self):
+        pass
 
 def get_geocoding(address):
     """
@@ -125,6 +128,14 @@ def create_lobby():
             rx.input(name="Name"),
             rx.text("Location: "),
             rx.input(name="Location"),
+            rx.radio(
+                ['Driver', 'Passenger'],
+                direction="row",
+                spacing="3",
+                size="3",
+                # on_change=State.change_user_type,
+                required=True,
+            ),
             rx.button(
                 "Add attendee",
                 type="submit",
