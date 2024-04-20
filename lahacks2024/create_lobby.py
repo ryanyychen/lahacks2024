@@ -7,7 +7,7 @@ import os
 
 # Keep track of entered users
 class State(rx.State):
-    users: list = [{},{}]
+    users: list = [{},{}] # 0 driver, 1 passenger
 
     # Add user to dictionary
     def add_user(self, form_data):
@@ -158,10 +158,22 @@ def get_distance_matrix(api_key, origins, destinations, travel_mode="driving"):
     return None
 
 def display_user_list():
-    driver_list: list = State.user_list_type(0)
-    print(State.user_list_type(0))
-    print(State.users[0].items())
-    return rx.vstack()
+    return rx.vstack(
+        rx.text(
+            'Drivers:',
+        ),
+        rx.foreach(
+            State.users[0].keys,
+            lambda name: rx.text(name)
+        ),
+        rx.text(
+            'Passengers:',
+        ),
+        rx.foreach(
+            State.users[1].keys,
+            lambda name: rx.text(name)
+        )
+    )
 
 def create_lobby():
     return rx.vstack(
