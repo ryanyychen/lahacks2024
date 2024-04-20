@@ -4,6 +4,7 @@ import googlemaps
 from dotenv import load_dotenv
 from lahacks2024.cluster import Kmeans
 import os
+import pandas as pd
 
 # Keep track of entered users
 class State(rx.State):
@@ -31,7 +32,10 @@ class State(rx.State):
         for coord in coords[1]:
             x.append(coord[0])
             y.append(coord[1])
-        clusters = Kmeans.cluster([x,y], centroids)
+        
+        dataset = pd.DataFrame({'x': x, 'y': y})
+        print(centroids)
+        clusters = Kmeans.cluster(dataset, centroids)
         print(clusters)
     
     def user_list_type(self, type):
@@ -157,23 +161,26 @@ def get_distance_matrix(api_key, origins, destinations, travel_mode="driving"):
     print("Distance Matrix API request failed:", distance_matrix["status"])
     return None
 
-def display_user_list():
-    return rx.vstack(
-        rx.text(
-            'Drivers:',
-        ),
-        rx.foreach(
-            State.users[0].keys,
-            lambda name: rx.text(name)
-        ),
-        rx.text(
-            'Passengers:',
-        ),
-        rx.foreach(
-            State.users[1].keys,
-            lambda name: rx.text(name)
-        )
-    )
+# def display_user_list():
+#     print(State.user_list)
+#     print(State.get_users)
+#     print(State.get_users())
+#     return rx.vstack(
+#         rx.text(
+#             'Drivers:',
+#         ),
+#         # rx.foreach(
+#         #     list(State.users[0].keys()),
+#         #     lambda name: rx.text(name)
+#         # ),
+#         rx.text(
+#             'Passengers:',
+#         ),
+#         # rx.foreach(
+#         #     list(State.users[1].keys()),
+#         #     lambda name: rx.text(name)
+#         # )
+#     )
 
 def create_lobby():
     return rx.vstack(
@@ -200,5 +207,5 @@ def create_lobby():
             "Calculate",
             on_click=State.calculate(),
         ),
-        display_user_list(),
+        # display_user_list(),
     )
