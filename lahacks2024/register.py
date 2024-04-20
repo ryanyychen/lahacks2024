@@ -2,7 +2,7 @@ from rxconfig import config
 from lahacks2024.userModel import User
 import reflex as rx
 
-class FormInputState(rx.State):
+class RegisterFormInputState(rx.State):
     form_data: dict = {}
 
     def handle_submit(self, form_data: dict):
@@ -73,7 +73,8 @@ def register() -> rx.Component:
                             ),
                             rx.table.cell(
                                 rx.input(
-                                    id="password",
+                                    name="password",
+                                    type="password",
                                 ),
                             ),
                         ),
@@ -92,18 +93,20 @@ def register() -> rx.Component:
                 rx.button(
                         "Submit",
                         type="submit",
-                    ),
+                ),
                 align="center",
                 justify="center",
-                spacing="7",
-                font_size="1em",
                 # Handle submit when submit button pressed
-                on_submit=FormInputState.handle_submit,
+                on_submit=RegisterFormInputState.handle_submit,
             ),
             rx.button(
                 "Back to Login",
                 on_click=lambda: rx.redirect("/login")
             ),
-            height="100vh",
+            align="center",
+            justify="center",
+            spacing="7",
+            font_size="1em",
         ),
+        height="100vh",
     ),
