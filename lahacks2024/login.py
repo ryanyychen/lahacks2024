@@ -1,6 +1,7 @@
 from rxconfig import config
 from lahacks2024.userModel import User
 import reflex as rx
+import bcrypt
 
 class LogInFormInputState(rx.State):
     form_data: dict = {}
@@ -11,7 +12,7 @@ class LogInFormInputState(rx.State):
         with rx.session() as session:
             # Query database and check email against password
             user = session.exec(User).filter(User.email == form_data["email"]).first()
-            if user and user.password == form_data["password"]:
+            if user and user.password == bcrypt.checkpw(password.encode('utf-8'), form_data["password"].encode('utf-8')):
                 # Redirect to homepage
                 return rx.redirect("/")
             else:
