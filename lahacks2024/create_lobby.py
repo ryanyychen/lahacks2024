@@ -1,28 +1,35 @@
 import reflex as rx
 import requests
 import googlemaps
+from dotenv import load_dotenv
+import os
 
+# Keep track of entered users
 class State(rx.State):
     users: dict = {}
 
+    # Add user to dictionary
     def add_user(self, form_data):
         name = form_data["Name"]
         location = form_data["Location"]
         self.users[name] = location
         self.get_geocoding_all()
     
+    # Return names of users added
     def user_list(self):
         users_l = []
         for each in self.users:
             users_l.append(each)
         return users_l
     
+    # Return locations of users added
     def loc_list(self):
         loc_l = []
         for each in self.users:
             loc_l.append(self.users[each])
         return loc_l
 
+    # Return latitude, longitude coordinates of each address
     def get_geocoding_all(self):
         locations = self.loc_list()
         geocodes = []
@@ -33,23 +40,6 @@ class State(rx.State):
         
         for code in geocodes:
             print(code)
-
-# async def get_geocoding(address):
-#     base_url = "https://api.positionstack.com/v1/forward"
-#     params = {
-#         "query": address,
-#         "access_key": "0df1ed6c498ab0a5b342bdfaf47400ea"
-#     }
-#     response = requests.get(base_url, params=params)
-
-#     if response.status_code == 200:
-#         data = response.json()
-#         # Check for successful geocoding
-#         if data["data"]:
-#             return data["data"][0]  # Assuming first result
-#     else:
-#         print(f"Error: {response.status_code}")
-#         return None
 
 def get_geocoding(address):
     """
@@ -62,7 +52,11 @@ def get_geocoding(address):
         A dictionary containing latitude, longitude and formatted address if successful, 
         None otherwise.
     """
-    api_key = "AIzaSyDnygqhrVgh6ZC9EiGpdruoF34s1qzs7dc"  # Replace with your actual API Key
+
+    load_dotenv('lahacks2024/.env')
+    
+    api_key = os.getenv('GOOGLE_API')  # Replace with your actual API Key
+    print(api_key)
     base_url = "https://maps.googleapis.com/maps/api/geocode/json?"
     params = {
         "address": address,
@@ -70,6 +64,9 @@ def get_geocoding(address):
     }
 
     response = requests.get(base_url, params=params)
+
+    print(response)
+    print(response.json())
 
     if response.status_code == 200:
         data = response.json()
