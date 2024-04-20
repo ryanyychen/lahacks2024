@@ -4,6 +4,7 @@ import googlemaps
 from dotenv import load_dotenv
 from lahacks2024.cluster import Kmeans
 import os
+import pandas as pd
 
 # Keep track of entered users
 class State(rx.State):
@@ -33,7 +34,10 @@ class State(rx.State):
         for coord in coords[1]:
             x.append(coord[0])
             y.append(coord[1])
-        clusters = Kmeans.cluster([x,y], centroids)
+        
+        dataset = pd.DataFrame({'x': x, 'y': y})
+        print(centroids)
+        clusters = Kmeans.cluster(dataset, centroids)
         print(clusters)
     
     def user_list_type(self, type):
@@ -217,5 +221,5 @@ def create_lobby():
             "Calculate",
             on_click=State.calculate(),
         ),
-        display_user_list(),
+        # display_user_list(),
     )
