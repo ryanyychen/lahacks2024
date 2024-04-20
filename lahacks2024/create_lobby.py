@@ -174,15 +174,17 @@ def get_distance_matrix(api_key, origins, destinations, travel_mode="driving"):
 
 def display_user_list():
     return rx.vstack(
-        rx.text(
+        rx.heading(
             'Drivers:',
+            size="3"
         ),
         rx.foreach(
             State.driver_dict,
             lambda name: rx.text(name)
         ),
-        rx.text(
+        rx.heading(
             'Passengers:',
+            size="3"
         ),
         rx.foreach(
             State.passenger_dict,
@@ -216,5 +218,5 @@ def create_lobby():
             "Calculate",
             on_click=State.calculate(),
         ),
-        # display_user_list(),
+        display_user_list(),
     )

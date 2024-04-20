@@ -2,4 +2,5 @@
 *.py[cod]
 .web
 __pycache__/
-lahacks/.env/*
+*/.env
+env/*
