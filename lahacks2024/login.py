@@ -48,6 +48,7 @@ def login() -> rx.Component:
                             rx.table.cell(
                                 rx.input(
                                     name="password",
+                                    placeholder="password",
                                     type="password",
                                 ),
                             ),
