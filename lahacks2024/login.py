@@ -11,12 +11,13 @@ class LogInFormInputState(rx.State):
         self.form_data = form_data
         with rx.session() as session:
             # Query database and check email against password
-            user = session.exec(User).filter(User.email == form_data["email"]).first()
-            if user and user.password == bcrypt.checkpw(password.encode('utf-8'), form_data["password"].encode('utf-8')):
+            user = session.query(User).filter(User.email == form_data["email"]).first()
+            if user and bcrypt.checkpw(form_data["password"].encode('utf-8'), user.password.encode('utf-8')):
                 # Redirect to homepage
                 return rx.redirect("/")
             else:
                 # Alert 'email or password incorrect'
+                print("Email or password incorrect")
                 return None
 
 input_style = {
