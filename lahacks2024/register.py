@@ -1,8 +1,9 @@
 from rxconfig import config
 from lahacks2024.userModel import User
 import reflex as rx
+import bcrypt
 
-class FormInputState(rx.State):
+class RegisterFormInputState(rx.State):
     form_data: dict = {}
 
     def handle_submit(self, form_data: dict):
@@ -11,14 +12,15 @@ class FormInputState(rx.State):
         if (form_data["password"] == form_data["password_confirm"]):
             # Start new connection session to database
             with rx.session() as session:
-                # Need to encrypt password before saving
+                # Encrypt password before saving
+                password = bcrypt.hashpw(form_data["password"].encode('utf-8'), bcrypt.gensalt())
                 # Add new user object
                 session.add(
                     User(
                         first_name=form_data["first_name"],
                         last_name=form_data["last_name"],
                         email=form_data["email"],
-                        password=form_data["password"],
+                        password=password,
                     )
                 )
                 # Commit changes to database
@@ -73,7 +75,8 @@ def register() -> rx.Component:
                             ),
                             rx.table.cell(
                                 rx.input(
-                                    id="password",
+                                    name="password",
+                                    type="password",
                                 ),
                             ),
                         ),
@@ -92,18 +95,20 @@ def register() -> rx.Component:
                 rx.button(
                         "Submit",
                         type="submit",
-                    ),
+                ),
                 align="center",
                 justify="center",
-                spacing="7",
-                font_size="1em",
                 # Handle submit when submit button pressed
-                on_submit=FormInputState.handle_submit,
+                on_submit=RegisterFormInputState.handle_submit,
             ),
             rx.button(
                 "Back to Login",
                 on_click=lambda: rx.redirect("/login")
             ),
-            height="100vh",
+            align="center",
+            justify="center",
+            spacing="7",
+            font_size="1em",
         ),
+        height="100vh",
     ),

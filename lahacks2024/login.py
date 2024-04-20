@@ -1,10 +1,24 @@
 from rxconfig import config
 from lahacks2024.userModel import User
 import reflex as rx
+import bcrypt
 
-def process_login():
-    # take credential and check database
-    return None
+class LogInFormInputState(rx.State):
+    form_data: dict = {}
+
+    def handle_submit(self, form_data: dict):
+        # Grab data from form
+        self.form_data = form_data
+        with rx.session() as session:
+            # Query database and check email against password
+            user = session.query(User).filter(User.email == form_data["email"]).first()
+            if user and bcrypt.checkpw(form_data["password"].encode('utf-8'), user.password.encode('utf-8')):
+                # Redirect to homepage
+                return rx.redirect("/")
+            else:
+                # Alert 'email or password incorrect'
+                print("Email or password incorrect")
+                return None
 
 input_style = {
     "margin-bottom": "5px",
@@ -12,31 +26,50 @@ input_style = {
 
 def login() -> rx.Component:
     return rx.center(
-        rx.flex(
-            rx.heading("Log in page", size="9"),
-            rx.flex(
-                rx.text("Username: "),
-                rx.input(placeholder="Enter Username", style=input_style),
-                align="center",
-            ),
-            rx.flex(
-                rx.text("Password: "),
-                rx.input(placeholder="Enter Password"),
-                align="center",
-            ),
-            rx.button(
-                "Log in",
-                on_click=process_login(),
-                size="4",
+        rx.vstack(
+            rx.form.root(
+                rx.heading("Log In", size="9"),
+                rx.table.root(
+                    rx.table.body(
+                        rx.table.row(
+                            rx.table.cell(
+                                "Username: ",
+                            ),
+                            rx.table.cell(
+                                rx.input(
+                                    name="email",
+                                    placeholder="email@domain.com",
+                                ),
+                            ),
+                        ),
+                        rx.table.row(
+                            rx.table.cell(
+                                "Password: ",
+                            ),
+                            rx.table.cell(
+                                rx.input(
+                                    name="password",
+                                    placeholder="password",
+                                    type="password",
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+                rx.button(
+                        "Log In",
+                        type="submit",
+                ),
+                on_submit=LogInFormInputState.handle_submit,
             ),
             rx.button(
                 "Register",
                 on_click=lambda: rx.redirect("/register"),
             ),
             align="center",
+            justify="center",
             spacing="7",
-            font_size="2em",
-            flex_direction="column",
+            font_size="1em",
         ),
         height="100vh",
-    )
+    ),
