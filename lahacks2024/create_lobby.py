@@ -8,16 +8,18 @@ import pandas as pd
 
 # Keep track of entered users
 class State(rx.State):
-    users: list = [{},{}] # 0 driver, 1 passenger
+    driver_dict: dict = {}
+    passenger_dict: dict = {}
+    # users = [driver_dict, passenger_dict] # 0 driver, 1 passenger
 
     # Add user to dictionary
     def add_user(self, form_data):
         name = form_data["Name"]
         location = form_data["Location"]
         if (form_data["User Type"] == "Driver"):
-            self.users[0][name] = location
+            self.driver_dict[name] = location
         else:
-            self.users[1][name] = location
+            self.passenger_dict[name] = location
     
     def calculate(self):
         coords = self.get_geocoding_all()
@@ -39,33 +41,42 @@ class State(rx.State):
         print(clusters)
     
     def user_list_type(self, type):
-        users_l = []
-        for each in self.users[type]:
-            users_l.append(each)
-        return users_l
+    #     users_l = []
+    #     for each in self.users[type]:
+    #         users_l.append(each)
+    #     return users_l
+        if type == 0:
+            return list(self.driver_dict.keys())
+        else:
+            return list(self.passenger_dict.keys())
+        
+
     
     # Return names of users added
     def user_list(self):
-        users_l = []
-        for type in self.users:
-            for each in type:
-                print(each)
-                users_l.append(each)
-        return users_l
+        # users_l = []
+        # for type in self.users:
+        #     for each in type:
+        #         print(each)
+        #         users_l.append(each)
+        # return users_l
+        return self.user_list_type(0).extend(self.user_list_type(1))
     
     # Return locations of drivers added
     def loc_list_drivers(self):
-        loc_l = []
-        for each in self.users[0]:
-            loc_l.append(self.users[0][each])
-        return loc_l
+        # loc_l = []
+        # for each in self.users[0]:
+        #     loc_l.append(self.users[0][each])
+        # return loc_l
+        return list(self.driver_dict.values())
     
     # Return locations of passengers added
     def loc_list_passengers(self):
-        loc_l = []
-        for each in self.users[1]:
-            loc_l.append(self.users[1][each])
-        return loc_l
+        # loc_l = []
+        # for each in self.users[1]:
+        #     loc_l.append(self.users[1][each])
+        # return loc_l
+        return list(self.passenger_dict.values())
 
     # Return latitude, longitude coordinates of each address
     def get_geocoding_all(self):
@@ -161,26 +172,26 @@ def get_distance_matrix(api_key, origins, destinations, travel_mode="driving"):
     print("Distance Matrix API request failed:", distance_matrix["status"])
     return None
 
-# def display_user_list():
-#     print(State.user_list)
-#     print(State.get_users)
-#     print(State.get_users())
-#     return rx.vstack(
-#         rx.text(
-#             'Drivers:',
-#         ),
-#         # rx.foreach(
-#         #     list(State.users[0].keys()),
-#         #     lambda name: rx.text(name)
-#         # ),
-#         rx.text(
-#             'Passengers:',
-#         ),
-#         # rx.foreach(
-#         #     list(State.users[1].keys()),
-#         #     lambda name: rx.text(name)
-#         # )
-#     )
+def display_user_list():
+    return rx.vstack(
+        rx.heading(
+            'Drivers:',
+            size="3"
+        ),
+        rx.foreach(
+            State.driver_dict,
+            lambda name: rx.text(name)
+        ),
+        rx.heading(
+            'Passengers:',
+            size="3"
+        ),
+        rx.foreach(
+            State.passenger_dict,
+            lambda name: rx.text(name),
+        )
+    )
+
 
 def create_lobby():
     return rx.vstack(
@@ -207,5 +218,5 @@ def create_lobby():
             "Calculate",
             on_click=State.calculate(),
         ),
-        # display_user_list(),
+        display_user_list(),
     )
