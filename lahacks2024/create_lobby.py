@@ -10,7 +10,7 @@ import pandas as pd
 class State(rx.State):
     driver_dict: dict = {}
     passenger_dict: dict = {}
-    # users = [driver_dict, passenger_dict] # 0 driver, 1 passenger
+    map: str = ""
 
     # Add user to dictionary
     def add_user(self, form_data):
@@ -36,9 +36,10 @@ class State(rx.State):
             y.append(coord[1])
         
         dataset = pd.DataFrame({'x': x, 'y': y})
-        print(centroids)
         clusters = Kmeans.cluster(dataset, centroids)
-        print(clusters)
+
+        self.map = self.map_url(clusters)
+        print(self.map)
     
     def user_list_type(self, type):
     #     users_l = []
@@ -51,7 +52,6 @@ class State(rx.State):
             return list(self.passenger_dict.keys())
         
 
-    
     # Return names of users added
     def user_list(self):
         # users_l = []
@@ -87,11 +87,11 @@ class State(rx.State):
 
         for location in driver_locations:
             geocode = get_geocoding(location)
-            driver_geocodes.append([geocode["longitude"], geocode["latitude"]])
+            driver_geocodes.append([geocode["latitude"], geocode["longitude"]])
         
         for location in passenger_locations:
             geocode = get_geocoding(location)
-            passenger_geocodes.append([geocode["longitude"], geocode["latitude"]])
+            passenger_geocodes.append([geocode["latitude"], geocode["longitude"]])
 
         for code in driver_geocodes:
             print(code)
@@ -100,6 +100,46 @@ class State(rx.State):
             print(code)
 
         return [driver_geocodes, passenger_geocodes]
+    
+    def transform_data(self, df):
+        def number_to_color(n):
+            colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange', 'pink', 'navy', 'beige', 'brown']
+            return colors[n]
+        
+        coords = self.get_geocoding_all()
+        coords[0].extend(coords[1])
+        coords = coords[0]
+        l = len(self.driver_dict)
+        return df.assign(
+            x = [coord[0] for coord in coords],
+            y = [coord[1] for coord in coords],
+            type = [('driver' if i < l else 'passenger') for i in range(df.shape[0])],
+            color = df['cluster'].apply(number_to_color),
+        ).drop(columns=['cluster'])
+    
+    def map_url(self, df): # columns: x, y, type, color
+        df = self.transform_data(df)
+        size = '500x400'
+        format = 'png'
+        language = 'english'
+        key = "AIzaSyBk6mPEMyEkSzlwE11KmcCcS_DWBmMfg-0"
+
+        passenger_df = df[df['type'] == 'passenger']
+        driver_df = df[df['type'] == 'driver']
+
+        marker_p_list = [marker_str(x, y, c, 'passenger') for x, y, c in 
+                        zip(passenger_df['x'].to_list(), 
+                            passenger_df['y'].to_list(), passenger_df['color'].to_list())]
+        marker_d_list = [marker_str(x, y, c, 'driver') for x, y, c in 
+                        zip(driver_df['x'].to_list(),
+                            driver_df['y'].to_list(), driver_df['color'].to_list())]
+
+        base = "https://maps.googleapis.com/maps/api/staticmap?"
+        format_list = ['size=' + size, 'format=' + format, 'language=' + language]
+        format_list.extend(marker_p_list)
+        format_list.extend(marker_d_list)
+        format_list.append('key=' + key)
+        return base + '&'.join(format_list)
 
 def get_geocoding(address):
     """
@@ -162,73 +202,53 @@ def display_user_list():
         )
     )
 
+def display_map():
+    return rx.vstack(
+        rx.heading("Map: ", size="4"),
+        rx.image(
+            src=State.map,
+        ),
+    )
 
 def create_lobby():
     return rx.vstack(
-        rx.form.root(
-            rx.text("Name: "),
-            rx.input(name="Name"),
-            rx.text("Location: "),
-            rx.input(name="Location"),
-            rx.radio(
-                ['Driver', 'Passenger'],
-                direction="row",
-                spacing="3",
-                size="3",
-                name="User Type",
-                required=True,
+        rx.heading("PoolParty", size="8"),
+        rx.hstack(
+            rx.vstack(
+                rx.form.root(
+                    rx.text("Name: "),
+                    rx.input(name="Name"),
+                    rx.text("Location: "),
+                    rx.input(name="Location"),
+                    rx.radio(
+                        ['Driver', 'Passenger'],
+                        direction="row",
+                        spacing="3",
+                        size="3",
+                        name="User Type",
+                        required=True,
+                    ),
+                    rx.button(
+                        "Add attendee",
+                        type="submit",
+                    ),
+                    on_submit=State.add_user,
+                ),
+                rx.button(
+                    "Calculate",
+                    on_click=State.calculate(),
+                ),
+                display_user_list(),
             ),
-            rx.button(
-                "Add attendee",
-                type="submit",
-            ),
-            on_submit=State.add_user,
+            display_map(),
+            margin="50px 0px 0px 0px",
+            height="80% vh",
+            justify="center",
         ),
-        rx.button(
-            "Calculate",
-            on_click=State.calculate(),
-        ),
-        display_user_list(),
+        margin="50px 0px 0px 0px",
+        height="80% vh",
+        justify="center",
     )
-
-def transform_data(df):
-    def number_to_color(n):
-        colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange', 'pink', 'navy', 'beige', 'brown']
-        return colors[n]
-    
-    coords = State.get_geocoding_all()
-    coords = coords[0] + coords[1]
-    l = len(State.driver_dict)
-    return df.assign(
-        x = [coord[0] for coord in coords],
-        y = [coord[1] for coord in coords],
-        type = [('driver' if i < l else 'passenger') for i in range(df.shape[0])],
-        color = df['group'].apply(number_to_color),
-    ).drop(columns=['id', 'group'])
-
-def map_url(df): # columns: x, y, type, color
-    df = transform_data(df)
-    size = '500x400'
-    format = 'png'
-    language = 'english'
-    key = "AIzaSyBk6mPEMyEkSzlwE11KmcCcS_DWBmMfg-0"
-
-    passenger_df = df[df['type'] == 'passenger']
-    driver_df = df[df['type'] == 'driver']
-
-    marker_p_list = [marker_str(x, y, c, 'passenger') for x, y, c in 
-                     zip(passenger_df['x'].to_list(), 
-                         passenger_df['y'].to_list(), passenger_df['color'].to_list())]
-    marker_d_list = [marker_str(x, y, c, 'driver') for x, y, c in 
-                     zip(driver_df['x'].to_list(),
-                         driver_df['y'].to_list(), driver_df['color'].to_list())]
-
-    base = "https://maps.googleapis.com/maps/api/staticmap?"
-    format_list = ['size=' + size, 'format=' + format, 'language=' + language]
-    format_list.extend(marker_p_list)
-    format_list.extend(marker_d_list)
-    format_list.append('key=' + key)
-    return base + '&'.join(format_list)
 
 def marker_str(x, y, color, type):
     if type == 'driver':
