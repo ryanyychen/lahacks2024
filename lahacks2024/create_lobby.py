@@ -142,36 +142,6 @@ def get_geocoding(address):
         print(f"Error: {response.status_code}")
     return None
 
-def get_distance_matrix(api_key, origins, destinations, travel_mode="driving"):
-  """
-  Calculates distance and travel time between origins and destinations using Google Distance Matrix API.
-
-  Args:
-      api_key: Your Google Maps API Key.
-      origins: List of origin addresses or coordinates (latitude, longitude).
-      destinations: List of destination addresses or coordinates (latitude, longitude).
-      travel_mode: Travel mode (driving, walking, bicycling, transit). Defaults to driving.
-
-  Returns:
-      A dictionary containing distance and duration matrices if successful, 
-      None otherwise.
-  """
-  api_key = "AIzaSyDnygqhrVgh6ZC9EiGpdruoF34s1qzs7dc"
-  client = googlemaps.Client(key=api_key)
-
-  distance_matrix = client.distance_matrix(
-      origins=origins,
-      destinations=destinations,
-      travel_mode=travel_mode
-  )
-
-  # Check for successful response
-  if distance_matrix["status"] == "OK":
-    return distance_matrix
-  else:
-    print("Distance Matrix API request failed:", distance_matrix["status"])
-    return None
-
 def display_user_list():
     return rx.vstack(
         rx.heading(
