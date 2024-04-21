@@ -190,3 +190,49 @@ def create_lobby():
         ),
         display_user_list(),
     )
+
+def transform_data(df):
+    def number_to_color(n):
+        colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange', 'pink', 'navy', 'beige', 'brown']
+        return colors[n]
+    
+    coords = State.get_geocoding_all()
+    coords = coords[0] + coords[1]
+    l = len(State.driver_dict)
+    return df.assign(
+        x = [coord[0] for coord in coords],
+        y = [coord[1] for coord in coords],
+        type = [('driver' if i < l else 'passenger') for i in range(df.shape[0])],
+        color = df['group'].apply(number_to_color),
+    ).drop(columns=['id', 'group'])
+
+def map_url(df): # columns: x, y, type, color
+    df = transform_data(df)
+    size = '500x400'
+    format = 'png'
+    language = 'english'
+    key = "AIzaSyBk6mPEMyEkSzlwE11KmcCcS_DWBmMfg-0"
+
+    passenger_df = df[df['type'] == 'passenger']
+    driver_df = df[df['type'] == 'driver']
+
+    marker_p_list = [marker_str(x, y, c, 'passenger') for x, y, c in 
+                     zip(passenger_df['x'].to_list(), 
+                         passenger_df['y'].to_list(), passenger_df['color'].to_list())]
+    marker_d_list = [marker_str(x, y, c, 'driver') for x, y, c in 
+                     zip(driver_df['x'].to_list(),
+                         driver_df['y'].to_list(), driver_df['color'].to_list())]
+
+    base = "https://maps.googleapis.com/maps/api/staticmap?"
+    format_list = ['size=' + size, 'format=' + format, 'language=' + language]
+    format_list.extend(marker_p_list)
+    format_list.extend(marker_d_list)
+    format_list.append('key=' + key)
+    return base + '&'.join(format_list)
+
+def marker_str(x, y, color, type):
+    if type == 'driver':
+        marker_style = ['anchor:top', f'color:{color}', f'label:D', f'{x},{y}']
+    else:
+        marker_style = ['anchor:top', f'color:{color}', f'label:P', f'{x},{y}']
+    return 'markers=' + '|'.join(marker_style)
